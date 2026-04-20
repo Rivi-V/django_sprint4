@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-
 from django.db import models
 
 from core.models import PublishedCreatedModel
@@ -27,6 +26,9 @@ class Category(PublishedCreatedModel):
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
+    def __str__(self):
+        return self.title
+
 
 class Location(PublishedCreatedModel):
     name = models.CharField(
@@ -37,6 +39,9 @@ class Location(PublishedCreatedModel):
     class Meta:
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
+
+    def __str__(self):
+        return self.name
 
 
 class Post(PublishedCreatedModel):
@@ -70,7 +75,34 @@ class Post(PublishedCreatedModel):
         null=True,
         verbose_name='Категория'
     )
+    image = models.ImageField('Картинка', upload_to='posts_images', blank=True)
 
     class Meta:
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.title
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Публикация'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор комментария'
+    )
+    text = models.TextField('Текст комментария')
+    created_at = models.DateTimeField('Добавлено', auto_now_add=True)
+
+    class Meta:
+        ordering = ('created_at',)
+
+    def __str__(self):
+        return self.text[:30]
